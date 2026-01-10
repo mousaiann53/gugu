@@ -1,0 +1,292 @@
+/* =========================================
+   星环主线 V19.0 (全屏地图 + 沉浸式大对话框)
+   ========================================= */
+
+/* --- 1. 基础布局 --- */
+.mainline-body { 
+    width: 100%; height: 100%; position: relative; overflow: hidden; 
+    display: flex; align-items: center; 
+    padding-left: 5%; padding-right: 5%; box-sizing: border-box;
+}
+
+.obelisk-container {
+    width: 100%; height: calc(100% - 80px); 
+    display: flex; align-items: center; min-width: 0;
+}
+
+/* 左侧封面 (您定制的参数) */
+.mainline-left { 
+    width: 30vh; height: 30vh; 
+    min-width: 250px; min-height: 250px;
+    margin-right: 210px; flex-shrink: 0; position: relative; z-index: 10; 
+}
+
+.mainline-right {
+    flex: 1; height: 60%; display: flex; align-items: center; gap: 50px; padding-right: 50px; 
+    overflow-x: auto; overflow-y: hidden; white-space: nowrap;
+    opacity: 0; transform: translateX(50px); 
+    transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    pointer-events: none;
+}
+.mainline-right.show { opacity: 1; transform: translateX(0); pointer-events: auto; }
+
+/* 滚动条 */
+.mainline-right::-webkit-scrollbar { height: 8px; display: block; }
+.mainline-right::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 4px; }
+.mainline-right::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 4px; cursor: pointer; }
+
+/* --- 2. 视觉素材 (唱片/卡片) --- */
+.chapter-card { 
+    min-width: 200px; height: 320px; flex-shrink: 0; 
+    display: flex; flex-direction: column; justify-content: center; align-items: center; 
+    cursor: pointer; transition: 0.4s; 
+}
+.chapter-card:hover { transform: translateY(-15px); }
+.chapter-card.locked { filter: grayscale(100%); opacity: 0.5; cursor: not-allowed; }
+
+.album-wrapper { width: 100%; height: 100%; position: relative; cursor: pointer; transition: 0.5s; }
+.album-cover { 
+    position: absolute; inset: 0; background: #0a0a0a; z-index: 2; 
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8); 
+    display: flex; flex-direction: column; justify-content: center; align-items: center; 
+    border: 1px solid #333; overflow: hidden; 
+}
+.album-cover::before { content: ''; position: absolute; top: 10%; left: 10%; width: 80%; height: 80%; border: 1px solid var(--gold-dim); opacity: 0.5; }
+.cover-line { position: absolute; width: 150%; height: 2px; background: var(--gold-main); top: 30%; left: -25%; transform: rotate(-15deg); }
+.cover-text-group { z-index: 5; text-align: center; }
+.cover-title { font-family:'Cinzel'; color:var(--gold-main); font-size: 24px; font-weight: bold; letter-spacing: 4px; text-shadow: 0 0 15px rgba(212,175,55,0.5); }
+.cover-sub { font-size: 10px; color: #666; letter-spacing: 2px; margin-top: 5px; }
+.album-prog { width: 60%; height: 6px; background: #333; margin-top: 15px; position: relative; border-radius: 3px; overflow: hidden; }
+.album-prog-fill { height: 100%; background: var(--gold-main); width: 0%; box-shadow: 0 0 10px var(--gold-main); }
+.album-prog-text { font-size: 9px; color: #666; margin-top: 5px; font-family: 'Cinzel'; }
+
+.vinyl-disk { 
+    width: 28vh; height: 28vh; min-width: 240px; min-height: 240px;
+    border-radius: 50%; background: radial-gradient(circle, #111 0%, #151515 40%, #050505 100%); 
+    border: 1px solid #222; position: absolute; top: 1vh; left: 1vh; z-index: 1; 
+    display: flex; align-items: center; justify-content: center; 
+    transition: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); 
+}
+.vinyl-disk::before { content: ''; position: absolute; inset: 35%; background: radial-gradient(circle, var(--gold-dim) 0%, #000 100%); border-radius: 50%; border: 2px solid var(--gold-main); z-index: 2; }
+.vinyl-disk::after { content: ''; position: absolute; inset: 0; background: repeating-radial-gradient(#111 0, #111 2px, #222 3px); border-radius: 50%; opacity: 0.3; }
+.album-wrapper:hover .vinyl-disk { transform: translateX(5vh); }
+.album-wrapper.open .vinyl-disk { transform: translateX(16vh) rotate(360deg); }
+
+.gold-record { 
+    width: 180px; height: 180px; flex-shrink: 0; 
+    border-radius: 50%; background: radial-gradient(circle, #222 0%, #000 70%); 
+    border: 1px solid #444; position: relative; 
+    display: flex; justify-content: center; align-items: center; 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8); animation: slow-spin 25s linear infinite; 
+}
+.gold-record::before { content:''; position: absolute; inset: 2px; border-radius: 50%; background: repeating-radial-gradient(transparent 0, transparent 2px, rgba(255,255,255,0.03) 3px); }
+.gold-record-label { width: 70px; height: 70px; border-radius: 50%; z-index: 2; background: radial-gradient(circle, #f8b500 0%, #d4af37 100%); border: 3px solid #000; box-shadow: 0 0 15px rgba(212,175,55,0.4); display:grid; place-items:center; }
+.gold-record-label::after { content:''; width: 10px; height: 10px; background: #000; border-radius: 50%; }
+@keyframes slow-spin { 100% { transform: rotate(360deg); } }
+
+.chap-info { margin-top: 20px; width: 100%; text-align: center; white-space: normal; }
+.chap-name { font-size: 16px; color: #ddd; font-weight: bold; margin-bottom: 5px; text-shadow: 0 0 10px rgba(0,0,0,0.8); }
+.chap-en { font-size: 10px; color: #777; font-family: 'Cinzel'; text-transform: uppercase; margin-bottom: 10px; }
+.chap-theme { font-size: 11px; color: var(--gold-main); font-family: 'Cinzel'; margin-top: 5px; letter-spacing: 1px; font-weight: bold; margin-bottom: 10px; }
+.chap-prog-track { width: 80%; height: 4px; background: #222; margin: 25px auto 0; border-radius: 2px; border: 1px solid #444; }
+.chap-prog-fill { height: 100%; background: var(--gold-main); width: 0%; box-shadow: 0 0 5px var(--gold-main); }
+.chap-prog-text { font-size: 10px; color: #555; margin-top: 5px; font-family: 'Cinzel'; }
+
+.mainline-nav { height: 80px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center; gap: 100px; background: #080808; z-index: 10; position: absolute; bottom: 0; width: 100%; }
+.nav-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; opacity: 0.5; transition: 0.3s; }
+.nav-item:hover, .nav-item.active { opacity: 1; }
+.nav-item.active .nav-cn { color: var(--gold-main); }
+.nav-cn { font-size: 18px; letter-spacing: 3px; font-weight: bold; color: #aaa; transition: 0.3s; }
+.nav-item.active::after { content:''; display: block; width: 40px; height: 2px; background: var(--gold-main); margin-top: 5px; }
+
+.epic-view { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: 0.5s; background:#000; z-index:15; }
+.epic-view.active { opacity: 1; pointer-events: auto; }
+.epic-text { color: #333; font-family: 'Cinzel'; letter-spacing: 5px; font-size: 24px; }
+
+
+/* =======================================================
+   ★★★ Layer 2: 关卡地图 (游戏框内全屏) ★★★
+   ======================================================= */
+.level-map-container {
+    position: absolute; inset: 0; width: 100%; height: 100%; z-index: 20;
+    background: #080808; display: none; flex-direction: column;
+}
+
+.level-map-container .nav-header { flex-shrink: 0; width: 100%; position: relative; z-index: 21; }
+
+#orb-container {
+    width: 100%; flex: 1; display: flex; justify-content: center; align-items: center;
+    position: relative; padding-bottom: 40px; 
+}
+
+.timeline-track { width: 80%; height: 4px; background: #333; position: relative; display: flex; justify-content: space-between; align-items: center; }
+.timeline-progress { position: absolute; left: 0; top: 0; height: 100%; background: var(--gold-main); width: 0%; box-shadow: 0 0 10px var(--gold-main); transition: width 1s ease; z-index: 1; }
+
+.timeline-orb { width: 40px; height: 40px; border-radius: 50%; background: #111; border: 2px solid #555; z-index: 2; cursor: pointer; position: relative; transition: 0.3s; display: flex; justify-content: center; align-items: center; }
+.timeline-orb.locked { border-color: #333; color: #555; pointer-events: none; }
+.timeline-orb.unlocked { border-color: var(--gold-main); box-shadow: 0 0 15px rgba(212,175,55,0.4); background: #222; }
+.timeline-orb.current { transform: scale(1.2); box-shadow: 0 0 25px rgba(212,175,55,0.8); background: var(--gold-dim); }
+.t-orb-name { position: absolute; top: 50px; width: 120px; text-align: center; font-size: 12px; color: #666; font-family: 'Noto Serif SC'; transition: 0.3s; }
+.timeline-orb.unlocked .t-orb-name { color: #fff; text-shadow: 0 0 5px var(--gold-main); }
+
+
+/* =======================================================
+   ★★★ Layer 3: 剧情阅读页 (沉浸式大屏版) ★★★
+   ======================================================= */
+.story-container {
+    position: absolute; inset: 0; width: 100%; height: 100%; z-index: 30;
+    background: #000; display: none; flex-direction: column;
+}
+.story-container .nav-header { flex-shrink: 0; position: relative; z-index: 31; background: #000; }
+
+.story-content-area {
+    flex: 1; width: 100%; display: flex; justify-content: center; align-items: flex-end; 
+    padding-bottom: 30px; /* 稍微留一点底 */
+    background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
+    position: relative;
+}
+
+/* --- AVG 对话框核心样式 (V20.0 精致版) --- */
+.avg-box {
+    /* 1. 宽度：保持宽屏沉浸感 */
+    width: 90% !important; 
+    max-width: 1200px !important; 
+
+    /* 2. 高度：变矮、变精致 (从 35vh -> 25vh) */
+    height: 25vh !important; 
+    min-height: 180px; /* 最小高度保护 */
+
+    /* 3. 背景与边框：增加磨砂质感 */
+    background: linear-gradient(90deg, rgba(10,10,10,0.95) 0%, rgba(20,20,20,0.9) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-left: 4px solid var(--gold-main); /* 左侧金线保留，变细一点更精致 */
+    border-radius: 4px; /* 轻微圆角 */
+    
+    margin: 0 auto; 
+    padding: 30px 40px; /* 内边距稍微缩小 */
+    
+    display: flex; flex-direction: column; position: relative;
+    box-shadow: 0 5px 30px rgba(0,0,0,0.5); /* 阴影收敛一点 */
+    backdrop-filter: blur(10px); /* 磨砂玻璃效果 */
+    box-sizing: border-box;
+}
+
+/* 说话人名字 */
+.avg-speaker {
+    position: absolute; top: -24px; left: -1px; /* 对齐左边框 */
+    background: var(--gold-main); color: #000;
+    padding: 4px 25px; 
+    font-weight: bold; font-size: 16px; /* 字号微调 */
+    clip-path: polygon(0 0, 100% 0, 92% 100%, 0 100%); /* 切角更锐利 */
+    z-index: 10;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+}
+
+/* --- 剧情文字 (优化换行宽度) --- */
+.avg-text { 
+    /* 1. 字体大小：保持清晰的大号字体 */
+    font-size: 18px !important; 
+    line-height: 1.6; 
+    color: #e0e0e0; 
+    
+    flex: 1; /* 撑满剩余高度 */
+    
+    /* 2. 边距控制：关键修改 */
+    margin-top: 15px; 
+    margin-right: 0; /* ★ 取消巨大的右侧留白，让文字能到最右边 */
+    padding-right: 20px; /* ★ 只留出一点点呼吸感，防止文字贴在边框上 */
+    
+    /* 滚动条设置 */
+    overflow-y: auto;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.8);
+    
+    /* 3. 防止文字被右上角功能键挡住 (如果文字特别长，第一行会避开) */
+    /* 通常 AVG 文本第一行不会写满，所以这里留给用户自然换行即可 */
+}
+
+/* 滚动条样式微调，让它不那么显眼 */
+.avg-text::-webkit-scrollbar { width: 4px; }
+.avg-text::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 2px; }
+
+
+/* --- 选项按钮区域 (左对齐 + 字体统一) --- */
+.avg-options {
+    position: absolute; 
+    /* 保持左下角定位 */
+    left: 40px; 
+    bottom: 25px; 
+    
+    display: flex; flex-direction: column; gap: 10px; 
+    width: 320px; /* 选项区域宽度 */
+    align-items: flex-start; /* 内容左对齐 */
+    z-index: 20;
+}
+
+.avg-btn {
+    width: 100%; text-align: left; 
+    padding: 12px 20px; 
+    
+    /* 背景加深，防止覆盖在文字上时看不清 */
+    background: rgba(0, 0, 0, 0.85); 
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-left: 3px solid var(--gold-dim); /* 左侧装饰 */
+    
+    /* ★ 字体调整：与正文一致 */
+    color: #ddd; 
+    font-size: 17px; /* 改为 18px，和 avg-text 一样大 */
+    
+    transition: 0.2s; backdrop-filter: blur(5px); cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+
+.avg-btn:hover {
+    background: var(--gold-dim); color: #000; border-color: var(--gold-main);
+    padding-left: 30px; /* 悬停交互幅度加大 */
+    transform: translateX(5px);
+}
+/* 功能按钮 (Skip/History) - 保持在右上角 */
+.avg-controls {
+    position: absolute; top: 15px; right: 20px;
+    display: flex; gap: 15px; z-index: 101;
+}
+.ctrl-btn {
+    background: rgba(0,0,0,0.3); /* 加个淡淡的底 */
+    padding: 2px 8px; border-radius: 2px;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(212, 175, 55, 0.6); font-size: 11px; cursor: pointer;
+    letter-spacing: 1px; transition: 0.3s; font-family: 'Cinzel';
+}
+.ctrl-btn:hover { color: var(--gold-main); border-color: var(--gold-main); background: #000; }
+
+/* =======================================================
+   ★★★ Layer 4: 历史记录 (新界面) ★★★
+   ======================================================= */
+.history-overlay {
+    position: absolute; inset: 0; z-index: 2000;
+    background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px);
+    display: none; justify-content: center; align-items: center;
+    animation: fadeIn 0.3s;
+}
+.history-panel {
+    width: 70%; height: 80%; background: #111;
+    border: 1px solid var(--gold-dim); box-shadow: 0 0 50px rgba(0,0,0,0.8);
+    display: flex; flex-direction: column; position: relative;
+}
+.hist-header {
+    height: 60px; border-bottom: 1px solid #333;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0 30px; background: rgba(212, 175, 55, 0.05);
+}
+.hist-title { color: var(--gold-main); font-size: 18px; font-family: 'Cinzel'; letter-spacing: 2px; }
+.hist-close { color: #666; font-size: 24px; cursor: pointer; transition: 0.3s; }
+.hist-close:hover { color: #fff; transform: scale(1.2); }
+.hist-content {
+    flex: 1; padding: 30px; overflow-y: auto;
+    display: flex; flex-direction: column; gap: 20px;
+}
+.hist-row { display: flex; flex-direction: column; gap: 5px; border-bottom: 1px dashed #222; padding-bottom: 15px; }
+.hist-name { color: var(--gold-dim); font-size: 14px; font-weight: bold; }
+.hist-text { color: #aaa; font-size: 16px; line-height: 1.6; }
+.hist-content::-webkit-scrollbar { width: 6px; }
+.hist-content::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+@keyframes fadeIn { from {opacity:0} to {opacity:1} }

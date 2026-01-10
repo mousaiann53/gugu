@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>咕咕大冒险 (V7.9 星环重构)</title>
+    
+    <link rel="stylesheet" href="css/style.css">
+    
+    <link rel="stylesheet" href="css/mainline.css">
+</head>
+<body>
+
+    <div id="game-container">
+        <div id="orientation-lock">
+    <div class="lock-content">
+        <div class="phone-icon">📱</div>
+        <div class="lock-text">为了最佳体验，请旋转手机横屏游玩</div>
+    </div>
+</div>
+        <div class="res-hud">
+            <div class="res-item"><div class="res-row-top"><div class="icon-box"><span class="res-sym sym-star">○</span></div><span class="res-val" id="res-star">0</span></div><span class="res-label">STARS</span></div>
+            <div class="res-item"><div class="res-row-top"><div class="icon-box"><span class="res-sym sym-eye">⊙</span></div><span class="res-val" id="res-eye">0</span></div><span class="res-label">ENERGY</span></div>
+            <div class="res-item"><div class="res-row-top"><div class="icon-box"><span class="res-sym sym-gem">◆</span></div><span class="res-val" id="res-gem">0</span></div><span class="res-label">GEMS</span></div>
+            <div class="res-item"><div class="res-row-top"><div class="icon-box"><span class="res-sym sym-sigil">✡</span></div><span class="res-val" id="res-sigil">0</span></div><span class="res-label">FATES</span></div>
+        </div>
+
+        <div class="bg-layer"><div class="golden-ring"></div></div>
+        
+        <div class="center-savings">
+            <div class="savings-title-cn">丰饶之海</div>
+            <div class="savings-sub-en">SEA OF ABUNDANCE</div>
+            <div class="savings-val-main" id="main-savings">0</div>
+            <div class="savings-lbl-main">已积攒丰饶之金 / ACCUMULATED GOLD</div>
+        </div>
+
+        <div class="vignette"></div>
+
+        <div class="ui-layer">
+            <button class="debug-btn" onclick="App.hardReset()">[RESET]</button>
+            <div class="music-player" id="music-btn" onclick="toggleMusic()">
+                <div class="music-icon">♬</div><span class="txt-en" style="color:var(--gold-dim)">BGM ON/OFF</span><audio id="bgm" loop> <source src="music.mp3" type="audio/mpeg"> </audio>
+            </div>
+            <div class="profile-hud" onclick="App.openView('view-profile')">
+                <div class="level-badge"><span class="level-num" id="ui-lvl">1</span></div>
+                <div class="info-box"><span class="player-name" id="ui-name">咕咕菌</span><span class="txt-en" style="color:#555">EXP: <span id="ui-exp">0/100</span></span></div>
+                <div class="bp-entry" onclick="event.stopPropagation(); App.openView('view-bp')"><div class="bp-ticket-icon"><div class="bp-ticket-inner"></div></div><span class="txt-en" style="margin-top:5px; color:var(--gold-dim)">MONTHLY PASS</span></div>
+            </div>
+            <div class="left-menu">
+                <div class="menu-btn" onclick="App.openView('view-museum')"><span class="txt-cn">辉光博物馆</span><span class="txt-en">MUSEUM</span></div>
+                <div class="menu-btn" onclick="App.openView('view-routine')"><span class="txt-cn">小行星日常</span><span class="txt-en">ROUTINE</span></div>
+                <div class="menu-btn" onclick="App.openView('view-shop')"><span class="txt-cn">虚空交易所</span><span class="txt-en">VOID EXCHANGE</span></div>
+                <div class="menu-btn" onclick="App.openView('view-inventory')"><span class="txt-cn">私人储藏室</span><span class="txt-en">PRIVATE VAULT</span></div>
+            </div>
+            <div class="wish-container" style="position:absolute; bottom:8%; right:5%;">
+                <div class="wish-circle" onclick="App.openView('view-wish')"><span class="txt-cn">宇宙寻回</span><span class="txt-en">RETRIEVAL</span></div>
+            </div>
+            <div class="mainline-entry" onclick="App.openView('view-mainline')">
+                <span class="txt-cn">星环主线</span><span class="txt-en">MAINLINE</span>
+            </div>
+            <div id="mask" class="modal-mask" style="display:none;"></div>
+        </div>
+
+        <input type="file" id="avatar-input" style="display:none;" accept="image/*" onchange="App.handleAvatarUpload(this)">
+
+        <div id="view-museum" class="fs-view"><div class="nav-header"><div class="back-square-btn" onclick="App.closeView()">‹</div><div class="header-title"><div class="header-cn">辉光博物馆</div><div class="header-en">GLIMMER MUSEUM</div></div></div><div class="museum-layout"><div class="museum-sidebar" id="museum-tabs"></div><div class="museum-content-area" id="museum-content"></div></div></div>
+        <div id="view-routine" class="fs-view"><div class="nav-header"><div class="back-square-btn" onclick="App.closeView()">‹</div><div class="header-title"><div class="header-cn">小行星日常</div><div class="header-en">ROUTINE MISSION</div></div></div><div class="view-content" id="routine-content"></div></div>
+        <div id="view-shop" class="fs-view"><div class="nav-header"><div class="back-square-btn" onclick="App.closeView()">‹</div><div class="header-title"><div class="header-cn">虚空交易所</div><div class="header-en">VOID EXCHANGE</div></div></div><div class="view-content" id="shop-content"></div></div>
+        <div id="view-inventory" class="fs-view"><div class="nav-header"><div class="back-square-btn" onclick="App.closeView()">‹</div><div class="header-title"><div class="header-cn">私人储藏室</div><div class="header-en">PRIVATE VAULT</div></div></div><div class="view-content" id="inventory-content"></div></div>
+        <div id="view-wish" class="fs-view"><div class="nav-header"><div class="back-square-btn" onclick="App.closeView()">‹</div><div class="header-title"><div class="header-cn">宇宙寻回</div><div class="header-en">COSMIC RETRIEVAL</div></div></div><div class="view-content" id="wish-content" style="display:flex; flex-direction:column; justify-content:center;"></div></div>
+        <div id="view-bp" class="fs-view"><div class="nav-header"><div class="back-square-btn" onclick="App.closeView()">‹</div><div class="header-title"><div class="header-cn">月度纪行</div><div class="header-en">MONTHLY PASS</div></div></div><div class="view-content" id="bp-content"></div></div>
+        <div id="view-profile" class="fs-view"><div class="nav-header"><div class="back-square-btn" onclick="App.closeView()">‹</div><div class="header-title"><div class="header-cn">人物档案</div><div class="header-en">PROFILE CARD</div></div></div><div class="view-content" id="profile-content"></div></div>
+
+    </div>
+
+    <script src="js/data.js"></script>
+    <script src="js/scripts.js"></script> 
+    <script src="js/engine.js"></script>
+    <script src="js/mainline.js"></script>
+
+    <script>
+        window.onload = function() {
+            console.log("正在启动咕咕大冒险...");
+
+            // 1. 启动游戏主引擎 (如果有的话)
+            if (typeof App !== 'undefined' && App.init) {
+                App.init();
+            }
+
+            // 2. 启动星环主线模块
+            // 这句话不跑，主线界面就不会生成！
+            if (typeof MainlineModule !== 'undefined') {
+                MainlineModule.init();
+                console.log("主线模块加载成功");
+            } else {
+                console.error("MainlineModule 未加载，请检查 js/mainline.js");
+            }
+        };
+    </script>
+
+</body>
+</html>
