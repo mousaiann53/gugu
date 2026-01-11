@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>咕咕大冒险 (V7.9 星环重构)</title>
     
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="./css/style.css"
+>
     
-    <link rel="stylesheet" href="css/mainline.css">
+    <link rel="stylesheet" href="./css/mainline.css">
 </head>
 <body>
 
@@ -73,30 +74,29 @@
 
     </div>
 
-    <script src="js/data.js"></script>
-    <script src="js/scripts.js"></script> 
-    <script src="js/engine.js"></script>
-    <script src="js/mainline.js"></script>
+<script defer src="./js/data.js"></script>
+<script defer src="./js/scripts.js"></script>
+<script defer src="./js/mainline.js"></script>
+<script defer src="./js/engine.js"></script>
 
-    <script>
-        window.onload = function() {
-            console.log("正在启动咕咕大冒险...");
+    
+   <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log("正在启动咕咕大冒险...");
 
-            // 1. 启动游戏主引擎 (如果有的话)
-            if (typeof App !== 'undefined' && App.init) {
-                App.init();
-            }
+    if (typeof App !== 'undefined' && App.init) {
+      App.init();
+    }
 
-            // 2. 启动星环主线模块
-            // 这句话不跑，主线界面就不会生成！
-            if (typeof MainlineModule !== 'undefined') {
-                MainlineModule.init();
-                console.log("主线模块加载成功");
-            } else {
-                console.error("MainlineModule 未加载，请检查 js/mainline.js");
-            }
-        };
-    </script>
+    if (typeof MainlineModule !== 'undefined' && MainlineModule.init) {
+      MainlineModule.init();
+      console.log("主线模块加载成功");
+    } else {
+      console.error("MainlineModule 未加载，请检查 js/mainline.js");
+    }
+  });
+</script>
+
 
 </body>
 </html>
