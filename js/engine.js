@@ -44,5 +44,19 @@ const App = {
     handleAvatarUpload(input) { if (input.files && input.files[0]) { const reader = new FileReader(); reader.onload = function(e) { if(e.total > 500000) { alert("图片太大，限500KB"); return; } App.data.profile.avatar = e.target.result; App.save(); App.renderProfile(); }; reader.readAsDataURL(input.files[0]); } },
  };
 
-// 独立的全局函数
-const toggleMusic = () => { const a = document.getElementById('bgm'); const btn = document.getElementById('music-btn'); if(a.paused) { a.play(); btn.classList.add('playing'); } else { a.pause(); btn.classList.remove('playing'); } };
+// 独立的全局函数（更稳）
+function toggleMusic() {
+  const a = document.getElementById('bgm');
+  const btn = document.getElementById('music-btn');
+
+  if (a.paused) {
+    a.play();
+    btn.classList.add('playing');
+  } else {
+    a.pause();
+    btn.classList.remove('playing');
+  }
+}
+window.toggleMusic = toggleMusic;
+
+window.App = App;

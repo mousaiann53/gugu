@@ -317,12 +317,14 @@ const MainlineModule = {
         this.enterChapter('ml01');
     },
 
-    giveReward(r) {
-        if(r.type === 'gold' && typeof App !== 'undefined') {
-            App.data.gold += r.val;
-            App.updateUI();
-            alert(`获得丰饶之金 x${r.val}`);
-        }
+   giveReward(r) {
+  if (!r || typeof App === 'undefined') return;
+
+  if (r.type === 'gold') {
+    App.data.monthlySavings = (App.data.monthlySavings || 0) + r.val;
+    App.save(); // save() 里会 renderHUD()
+    alert(`获得丰饶之金 x${r.val}`);
+  }
     },
 
     backToLevels() { document.getElementById('story-view').style.display = 'none'; },
