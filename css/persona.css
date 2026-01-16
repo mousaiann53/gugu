@@ -1,285 +1,210 @@
-/* persona.css - 人格系统独立页面样式（尽量不污染全局） */
-:root{
-  --gold-main: var(--gold-main, #c9a23a);
-  --gold-dim:  var(--gold-dim, rgba(201,162,58,.55));
-  --bg-deep:   rgba(10,12,16,.92);
-  --bg-card:   rgba(16,18,24,.78);
-  --line-soft: rgba(255,255,255,.08);
-  --txt-dim:   rgba(255,255,255,.65);
-}
+/* 只允许人格页面生效：所有选择器都必须以 #view-persona 开头，避免污染全局 */
 
+/* 人格页整体 */
 #view-persona .persona-view{
-  padding: 16px 14px 18px;
-}
-
-#view-persona .nav-header{
   display:flex;
-  align-items:center;
-  gap:10px;
-  padding: 10px 14px;
-  border-bottom: 1px solid var(--line-soft);
-  background: linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,0));
+  height:calc(100vh - 90px);
+  gap:16px;
+  padding:16px;
+  box-sizing:border-box;
 }
 
-#view-persona .back-square-btn{
-  width:34px;height:34px;
-  display:flex;align-items:center;justify-content:center;
-  border: 1px solid var(--gold-dim);
+/* 左侧：卡牌列表（横向一排，可滑动） */
+#view-persona .persona-roster{
+  flex: 0 0 34%;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+#view-persona .persona-roster .roster-title{
+  font-family: 'Cinzel', serif;
   color: var(--gold-main);
-  border-radius: 10px;
-  cursor:pointer;
-  user-select:none;
-  background: rgba(0,0,0,.25);
-  box-shadow: 0 0 14px rgba(201,162,58,.12);
-  font-size: 18px;
-  line-height: 1;
+  letter-spacing: 2px;
+  font-size: 14px;
+  opacity: .9;
 }
-#view-persona .back-square-btn:hover{ filter: brightness(1.08); }
 
-#view-persona .header-title{ line-height: 1.1; }
-#view-persona .header-cn{ font-weight: 700; letter-spacing:.08em; }
-#view-persona .header-en{ font-size: 10px; color: var(--txt-dim); letter-spacing:.22em; margin-top:2px; }
-
-#view-persona .persona-card-row{
+#view-persona .persona-roster .roster-strip{
   display:flex;
-  gap:10px;
+  gap:12px;
   overflow-x:auto;
-  padding: 14px 2px 12px;
-  scrollbar-width: thin;
+  padding-bottom:6px;
 }
-#view-persona .persona-card-row::-webkit-scrollbar{ height: 8px; }
-#view-persona .persona-card-row::-webkit-scrollbar-thumb{ background: rgba(255,255,255,.12); border-radius: 99px; }
 
-#view-persona .p-card{
+#view-persona .persona-card{
   min-width: 140px;
-  max-width: 160px;
-  flex: 0 0 auto;
-  padding: 12px 12px 10px;
-  border-radius: 14px;
-  border: 1px solid rgba(201,162,58,.35);
-  background: radial-gradient(140px 80px at 30% 15%, rgba(201,162,58,.20), rgba(0,0,0,0)),
-              linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,0));
-  position: relative;
+  border:1px solid rgba(255,215,128,.25);
+  border-radius:14px;
+  padding:10px;
+  background: rgba(0,0,0,.25);
+  box-shadow: 0 8px 18px rgba(0,0,0,.35);
   cursor:pointer;
   user-select:none;
 }
-#view-persona .p-card::after{
-  content:"";
-  position:absolute; inset:10px;
-  border-radius: 12px;
-  border: 1px dashed rgba(201,162,58,.22);
-  pointer-events:none;
-}
-#view-persona .p-card:hover{ transform: translateY(-1px); }
-#view-persona .p-card.active{
-  box-shadow: 0 0 22px rgba(201,162,58,.18);
-  border-color: rgba(201,162,58,.65);
-}
-#view-persona .p-card .p-name{ font-weight: 800; letter-spacing:.06em; }
-#view-persona .p-card .p-role{ margin-top:6px; font-size: 11px; color: var(--txt-dim); }
-#view-persona .p-card .p-stars{ margin-top:8px; display:flex; gap:4px; align-items:center; }
-#view-persona .p-card .p-tag{
-  display:inline-flex; align-items:center;
-  margin-top:10px;
-  font-size: 10px;
-  color: rgba(255,255,255,.7);
-  padding: 4px 8px;
-  border: 1px solid rgba(255,255,255,.10);
-  border-radius: 999px;
-  background: rgba(0,0,0,.22);
+
+#view-persona .persona-card.active{
+  border-color: rgba(255,215,128,.75);
+  box-shadow: 0 10px 22px rgba(0,0,0,.45);
 }
 
-#view-persona .persona-panel{
-  display:grid;
-  grid-template-columns: 1.05fr 1.2fr 1.25fr;
-  gap: 12px;
-  align-items: stretch;
+#view-persona .persona-card .name-cn{
+  color:#ddd;
+  font-size:14px;
+  font-weight:700;
 }
 
-#view-persona .p-pane{
-  border-radius: 16px;
-  border: 1px solid var(--line-soft);
-  background: linear-gradient(180deg, rgba(16,18,24,.72), rgba(0,0,0,.15));
-  box-shadow: 0 0 20px rgba(0,0,0,.25);
+#view-persona .persona-card .name-en{
+  color:#666;
+  font-family:'Cinzel', serif;
+  font-size:10px;
+  letter-spacing: 1px;
+  margin-top:2px;
+}
+
+#view-persona .persona-card .tagline{
+  color:#777;
+  font-size:11px;
+  margin-top:8px;
+}
+
+/* 中间：角色展示（占位，可后续换图） */
+#view-persona .persona-stage{
+  flex: 0 0 30%;
+  border-radius:18px;
+  border:1px solid rgba(255,215,128,.18);
+  background: radial-gradient(circle at 30% 20%, rgba(255,215,128,.08), rgba(0,0,0,.30) 55%, rgba(0,0,0,.55));
+  position:relative;
   overflow:hidden;
 }
 
-#view-persona .p-pane .pane-head{
-  padding: 12px 12px 10px;
-  border-bottom: 1px solid var(--line-soft);
-  display:flex; align-items:center; justify-content:space-between;
-  background: rgba(0,0,0,.18);
-}
-#view-persona .pane-title{
-  display:flex; align-items:center; gap:8px;
-  font-weight: 800;
-  letter-spacing:.06em;
-}
-#view-persona .pane-sub{
-  font-size: 10px; color: var(--txt-dim);
-  letter-spacing:.18em;
-}
-
-#view-persona .pane-body{ padding: 12px; }
-
-#view-persona .p-desc{
-  color: rgba(255,255,255,.75);
-  font-size: 12px;
-  line-height: 1.55;
-}
-#view-persona .p-meta{
-  margin-top: 10px;
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-#view-persona .meta-item{
-  padding: 10px;
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,.08);
-  background: rgba(0,0,0,.18);
-}
-#view-persona .meta-k{ font-size: 10px; color: var(--txt-dim); letter-spacing:.14em; }
-#view-persona .meta-v{ margin-top:6px; font-weight: 800; }
-
-#view-persona .p-showcase{
-  height: 320px;
-  border-radius: 16px;
-  border: 1px solid rgba(201,162,58,.25);
-  background:
-    radial-gradient(220px 140px at 55% 20%, rgba(201,162,58,.20), rgba(0,0,0,0)),
-    radial-gradient(240px 160px at 40% 60%, rgba(255,255,255,.06), rgba(0,0,0,0)),
-    linear-gradient(180deg, rgba(0,0,0,.20), rgba(0,0,0,.55));
-  position: relative;
-  overflow:hidden;
-}
-#view-persona .p-showcase::before{
-  content:"";
-  position:absolute; inset:18px;
-  border-radius: 14px;
-  border: 1px dashed rgba(201,162,58,.22);
-}
-#view-persona .p-silhouette{
+#view-persona .persona-stage .silhouette{
   position:absolute;
-  inset:0;
+  inset:12% 14%;
+  border-radius:22px;
+  border:1px dashed rgba(255,215,128,.25);
   display:flex;
   align-items:center;
   justify-content:center;
-  color: rgba(201,162,58,.8);
-  letter-spacing:.22em;
-  font-weight: 900;
-  font-size: 12px;
-  opacity:.9;
-}
-#view-persona .p-sigil-grid{
-  position:absolute; inset:0;
-  background-image:
-    linear-gradient(to right, rgba(255,255,255,.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255,255,255,.05) 1px, transparent 1px);
-  background-size: 34px 34px;
-  opacity:.15;
+  color: rgba(255,215,128,.55);
+  font-family:'Cinzel', serif;
+  letter-spacing:2px;
 }
 
-#view-persona .p-actions{
-  display:flex; gap:8px; flex-wrap:wrap;
+/* 右侧：属性/按钮/技能 */
+#view-persona .persona-panel{
+  flex: 1;
+  border-radius:18px;
+  border:1px solid rgba(255,215,128,.18);
+  background: rgba(0,0,0,.25);
+  padding:14px;
+  box-sizing:border-box;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
 }
-#view-persona .p-btn{
-  display:inline-flex; align-items:center; gap:8px;
-  padding: 10px 12px;
-  border-radius: 12px;
-  border: 1px solid rgba(201,162,58,.35);
-  background: rgba(0,0,0,.22);
-  color: rgba(255,255,255,.9);
+
+#view-persona .persona-panel .p-title{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap:10px;
+}
+
+#view-persona .persona-panel .p-title .big{
+  color:#ddd;
+  font-size:18px;
+  font-weight:800;
+}
+
+#view-persona .persona-panel .p-title .small{
+  color:#666;
+  font-family:'Cinzel', serif;
+  font-size:11px;
+  letter-spacing:1px;
+}
+
+#view-persona .persona-panel .stats{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+#view-persona .persona-panel .stat{
+  flex: 1 1 120px;
+  border:1px solid rgba(255,215,128,.18);
+  border-radius:14px;
+  padding:10px;
+  background: rgba(0,0,0,.18);
+}
+
+#view-persona .persona-panel .stat .k{
+  color:#777;
+  font-size:11px;
+}
+
+#view-persona .persona-panel .stat .v{
+  color:#ddd;
+  font-size:16px;
+  font-weight:800;
+  margin-top:6px;
+}
+
+#view-persona .persona-panel .actions{
+  display:flex;
+  gap:10px;
+}
+
+#view-persona .persona-panel .btn-geo{
+  flex:1;
+  border-radius:14px;
+  border:1px solid rgba(255,215,128,.35);
+  background: rgba(0,0,0,.20);
+  color: var(--gold-main);
+  padding:10px 12px;
+  font-family:'Cinzel', serif;
+  letter-spacing:1px;
   cursor:pointer;
-  user-select:none;
-}
-#view-persona .p-btn:hover{ filter: brightness(1.06); }
-#view-persona .p-btn.primary{
-  border-color: rgba(201,162,58,.65);
-  box-shadow: 0 0 18px rgba(201,162,58,.14);
-}
-#view-persona .p-btn:disabled{
-  opacity:.45;
-  cursor:not-allowed;
-  filter: none;
 }
 
-#view-persona .p-section{
-  margin-top: 12px;
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,.08);
-  background: rgba(0,0,0,.16);
-  overflow:hidden;
+#view-persona .persona-panel .btn-geo:hover{
+  border-color: rgba(255,215,128,.7);
 }
-#view-persona .p-section .sec-head{
-  padding: 10px 10px 8px;
-  border-bottom: 1px solid rgba(255,255,255,.06);
-  display:flex; align-items:center; justify-content:space-between;
+
+/* 技能卡片区 */
+#view-persona .skill-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:10px;
 }
-#view-persona .sec-title{ font-weight: 800; letter-spacing:.06em; }
-#view-persona .sec-sub{ font-size: 10px; color: var(--txt-dim); letter-spacing:.14em; }
-#view-persona .sec-body{ padding: 10px; }
 
 #view-persona .skill-card{
-  border-radius: 14px;
-  border: 1px solid rgba(201,162,58,.22);
-  background: rgba(0,0,0,.20);
-  padding: 10px;
-  margin-bottom: 10px;
-}
-#view-persona .skill-name{
-  font-weight: 900;
-  letter-spacing:.04em;
-  display:flex; align-items:center; justify-content:space-between;
-}
-#view-persona .skill-desc{ margin-top:6px; color: rgba(255,255,255,.72); font-size: 12px; line-height: 1.5; }
-#view-persona .skill-foot{ margin-top:10px; display:flex; align-items:center; justify-content:space-between; gap:8px; }
-#view-persona .skill-lv{ color: rgba(255,255,255,.85); font-weight: 800; font-size: 12px; }
-
-#view-persona .bar{
-  height: 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.08);
-  background: rgba(0,0,0,.22);
-  overflow:hidden;
-}
-#view-persona .bar > i{
-  display:block; height:100%;
-  width:0%;
-  background: linear-gradient(90deg, rgba(201,162,58,.65), rgba(201,162,58,.18));
+  border-radius:14px;
+  border:1px solid rgba(255,215,128,.18);
+  background: rgba(0,0,0,.18);
+  padding:10px;
 }
 
-/* 金色几何图标（无 emoji） */
-#view-persona .gicon{
-  width:14px;height:14px;
-  display:inline-block;
-  border: 1px solid rgba(201,162,58,.85);
-  box-shadow: 0 0 10px rgba(201,162,58,.12);
-  background: rgba(0,0,0,.15);
+#view-persona .skill-card .s-name{
+  color:#ddd;
+  font-size:12px;
+  font-weight:700;
 }
-#view-persona .gicon.diamond{ transform: rotate(45deg); border-radius: 2px; }
-#view-persona .gicon.ring{ border-radius: 50%; }
-#view-persona .gicon.hex{
-  clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
-}
-#view-persona .gicon.slash{
-  position:relative;
-  overflow:hidden;
-  border-radius: 3px;
-}
-#view-persona .gicon.slash::after{
-  content:"";
-  position:absolute;
-  left:-40%; top:45%;
-  width:180%; height:2px;
-  background: rgba(201,162,58,.9);
-  transform: rotate(-25deg);
+#view-persona .skill-card .s-desc{
+  color:#777;
+  font-size:11px;
+  margin-top:6px;
+  line-height:1.35;
 }
 
-/* 小屏适配 */
-@media (max-width: 980px){
-  #view-persona .persona-panel{
-    grid-template-columns: 1fr;
-  }
-  #view-persona .p-showcase{ height: 260px; }
+/* 心相槽位（先做占位） */
+#view-persona .heart-slot{
+  margin-top:auto;
+  border-radius:16px;
+  border:1px dashed rgba(255,215,128,.25);
+  padding:12px;
+  color: rgba(255,215,128,.55);
+  font-family:'Cinzel', serif;
+  letter-spacing:1px;
+  text-align:center;
 }

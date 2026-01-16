@@ -94,12 +94,31 @@
                 <div class="wish-circle" onclick="App.openView('view-wish')"><span class="txt-cn">宇宙寻回</span><span
                         class="txt-en">RETRIEVAL</span></div>
             </div>
-            <div class="mainline-entry" onclick="App.openView('view-mainline')">
-                <span class="txt-cn">星环主线</span><span class="txt-en">MAINLINE</span>
+            <!-- 右侧入口：主线 + 人格（强制固定在右侧，避免被 CSS 搞到中间） -->
+            <div class="right-rail" style="
+  position:absolute;
+  right:5%;
+  bottom: 40%;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  align-items:flex-end;
+  z-index:30;
+">
+                <div class="mainline-entry"
+                    style="position:relative; left:auto; top:auto; right:auto; bottom:auto; transform:none;"
+                    onclick="App.openView('view-mainline')">
+                    <span class="txt-cn">星环主线</span><span class="txt-en">MAINLINE</span>
+                </div>
+
+                <!-- 让人格继承 mainline-entry 的画风 -->
+                <div class="mainline-entry persona-entry"
+                    style="position:relative; left:auto; top:auto; right:auto; bottom:auto; transform:none;"
+                    onclick="App.openView('view-persona')">
+                    <span class="txt-cn">人格</span><span class="txt-en">PERSONA</span>
+                </div>
             </div>
-            <div class="persona-entry" onclick="App.openView('view-persona')">
-                <span class="txt-cn">人格</span><span class="txt-en">PERSONA</span>
-            </div>
+
 
             <div id="mask" class="modal-mask" style="display:none;"></div>
         </div>
@@ -199,9 +218,11 @@
 
     <script defer src="./js/data.js"></script>
     <script defer src="./js/scripts.js"></script>
+    <script defer src="./js/engine.js"></script>
     <script defer src="./js/mainline.js"></script>
     <script defer src="./js/persona.js"></script>
-    <script defer src="./js/engine.js"></script>
+
+
 
 
     <script>
