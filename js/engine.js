@@ -28,33 +28,12 @@ const App = {
     lastMonth: -1,
     birthdayClaimedYear: null,
     lifetimeStats: { totalLogin: 0, totalTasks: 0, totalGacha: 0, totalSavings: 0 },
-        achievementsClaimed: [],
-    // 人格/技能系统（v0.1）
-    persona: {
-      tokens: 0,              // 徽记：做任务获得，用于开盲盒/兑换材料
-      lastFreeRoll: '',       // 每日免费盲盒日期（toDateString）
-      mats: {                 // 技能材料
-        watercolor: 0,
-        illustration: 0,
-        tarot: 0,
-        bazi: 0,
-        universal: 0,
-      },
-      skills: {
-        watercolor: { lvl: 1, xp: 0 },
-        illustration: { lvl: 1, xp: 0 },
-        tarot: { lvl: 1, xp: 0 },
-        bazi: { lvl: 1, xp: 0 },
-      },
-      unlocked: { painter: true, mystic: true }, // 先都开，后续再接主线解锁
-      history: [], // 最近掉落记录（最多保留20条）
-    },
+    achievementsClaimed: [],
   },
 
   init() {
     console.log("Game Init Start");
     this.load();
-    this.ensurePersonaSystem();
     this.timeCheck();
     this.checkLoginTask();
     this.renderHUD();
@@ -96,27 +75,7 @@ const App = {
       lastMonth: -1,
       birthdayClaimedYear: null,
       lifetimeStats: { totalLogin: 0, totalTasks: 0, totalGacha: 0, totalSavings: 0 },
-          achievementsClaimed: [],
-    // 人格/技能系统（v0.1）
-    persona: {
-      tokens: 0,              // 徽记：做任务获得，用于开盲盒/兑换材料
-      lastFreeRoll: '',       // 每日免费盲盒日期（toDateString）
-      mats: {                 // 技能材料
-        watercolor: 0,
-        illustration: 0,
-        tarot: 0,
-        bazi: 0,
-        universal: 0,
-      },
-      skills: {
-        watercolor: { lvl: 1, xp: 0 },
-        illustration: { lvl: 1, xp: 0 },
-        tarot: { lvl: 1, xp: 0 },
-        bazi: { lvl: 1, xp: 0 },
-      },
-      unlocked: { painter: true, mystic: true }, // 先都开，后续再接主线解锁
-      history: [], // 最近掉落记录（最多保留20条）
-    },
+      achievementsClaimed: [],
     };
 
     if (s) {
@@ -844,351 +803,38 @@ const App = {
   doBpTask(id, exp, type) {
     this.data.bpTasksDone[id] = true;
     this.data.bpExp += exp;
-
-    // 人格/技能：BP任务也给一点掉落（更温和的正反馈）
-    this.personaOnTaskDone(type, "bp");
-
     this.save();
     this.renderBpSub(type);
   },
 
-
-
-  /* =========================
-   * 人格/技能系统（v0.1）
-   * - 目标：让“努力”变成可视化成长，而不是堆外观素材
-   * - 玩法：做任务/课程 -> 掉落材料+经验 -> 升级技能 -> 更容易掉落（轻度正反馈）
-   * ========================= */
-  ensurePersonaSystem() {
-    const def = {
-      tokens: 0,
-      lastFreeRoll: '',
-      mats: { watercolor: 0, illustration: 0, tarot: 0, bazi: 0, universal: 0 },
-      skills: {
-        watercolor: { lvl: 1, xp: 0 },
-        illustration: { lvl: 1, xp: 0 },
-        tarot: { lvl: 1, xp: 0 },
-        bazi: { lvl: 1, xp: 0 },
-      },
-      unlocked: { painter: true, mystic: true },
-      history: [],
-    };
-
-    if (!this.data.persona) this.data.persona = def;
-
-    // 轻量“深合并”（只合 persona 这一块，避免你以后版本更新丢字段）
-    const p = this.data.persona;
-    p.tokens = Number.isFinite(p.tokens) ? p.tokens : def.tokens;
-    p.lastFreeRoll = p.lastFreeRoll || def.lastFreeRoll;
-    p.mats = { ...def.mats, ...(p.mats || {}) };
-
-    p.skills = p.skills || {};
-    for (const k of Object.keys(def.skills)) {
-      p.skills[k] = { ...def.skills[k], ...(p.skills[k] || {}) };
-      p.skills[k].lvl = Math.max(1, Math.min(10, parseInt(p.skills[k].lvl || 1, 10)));
-      p.skills[k].xp = Math.max(0, parseInt(p.skills[k].xp || 0, 10));
-    }
-
-    p.unlocked = { ...def.unlocked, ...(p.unlocked || {}) };
-    p.history = Array.isArray(p.history) ? p.history.slice(0, 20) : [];
-
-    this.data.persona = p;
-  },
-
-  _todayKey() {
-    return new Date().toDateString();
-  },
-
-  getSkillXpNeed(lvl) {
-    // 1-10：越来越慢一点，但别太肝
-    return 80 + (lvl - 1) * 40;
-  },
-
-  getSkillMatNeed(lvl) {
-    // 升级材料需求（可改）：1->2 需要5，后面慢慢涨
-    return 5 + (lvl - 1) * 2;
-  },
-
-  tagToSkill(tag) {
-    const t = String(tag || '').toLowerCase();
-    // 你现在还没给任务打标签，所以这里做“模糊匹配”，先跑起来再说
-    if (t.includes('water') || t.includes('水彩') || t.includes('w0') || t.includes('w1') || t.includes('w2')) return 'watercolor';
-    if (t.includes('illustr') || t.includes('插画') || t.includes('构成') || t.includes('composition') || t.includes('k0') || t.includes('k1')) return 'illustration';
-    if (t.includes('tarot') || t.includes('塔罗') || t.startsWith('t')) return 'tarot';
-    if (t.includes('bazi') || t.includes('八字') || t.startsWith('b')) return 'bazi';
-    return null;
-  },
-
-  personaAddDrop(skillKey, mats = 0, xp = 0, note = '') {
-    this.ensurePersonaSystem();
-    const p = this.data.persona;
-
-    if (skillKey === 'universal') {
-      p.mats.universal += mats;
-    } else if (p.mats[skillKey] != null) {
-      p.mats[skillKey] += mats;
-    }
-
-    if (skillKey && p.skills[skillKey]) {
-      p.skills[skillKey].xp += xp;
-    }
-
-    const ts = new Date().toLocaleTimeString();
-    const line = `${ts}｜${note}`;
-    if (note) {
-      p.history.unshift(line);
-      if (p.history.length > 20) p.history.pop();
-    }
-  },
-
-  personaOnTaskDone(tag, source = 'task') {
-    this.ensurePersonaSystem();
-    const p = this.data.persona;
-
-    // 每次任务：给一点徽记，给一点材料（温和，不惩罚断签）
-    p.tokens += 1;
-
-    const skill = this.tagToSkill(tag);
-    if (!skill) {
-      // 没标签时：掉一点通用材料，保证也有成长
-      this.personaAddDrop('universal', 1, 0, `通用材料 +1（${source}）`);
-      return;
-    }
-
-    const s = p.skills[skill];
-    const lvl = s?.lvl || 1;
-    const chance = Math.min(0.25 + (lvl - 1) * 0.05, 0.65);
-
-    if (Math.random() < chance) {
-      const xp = 6 + Math.floor(Math.random() * 5);
-      this.personaAddDrop(skill, 1, xp, `${skill} 材料 +1，EXP +${xp}（${source}）`);
-    } else {
-      this.personaAddDrop('universal', 1, 0, `通用材料 +1（${source}）`);
-    }
-  },
-
-  personaRoll(isPaid = false) {
-    this.ensurePersonaSystem();
-    const p = this.data.persona;
-    const today = this._todayKey();
-
-    if (!isPaid) {
-      if (p.lastFreeRoll === today) {
-        alert('今天的免费盲盒已经开过啦～明天再来。');
-        return;
-      }
-      p.lastFreeRoll = today;
-    } else {
-      if (p.tokens < 10) {
-        alert('徽记不足（需要 10）。去做点日常/纪行任务就有啦。');
-        return;
-      }
-      p.tokens -= 10;
-    }
-
-    const pool = ['watercolor', 'illustration', 'tarot', 'bazi'];
-    const pick = pool[Math.floor(Math.random() * pool.length)];
-    const mats = 1 + Math.floor(Math.random() * 3);
-    const xp = 12 + Math.floor(Math.random() * 12);
-
-    this.personaAddDrop(pick, mats, xp, `盲盒：${pick} 材料 +${mats}，EXP +${xp}`);
-
-    // 顺手给一点通用材料，降低“开出来不是我想要的”的挫败感
-    this.personaAddDrop('universal', 1, 0, '盲盒：通用材料 +1');
-
-    this.save();
-    this.renderProfile('persona');
-
-    alert(`✨盲盒结果
-获得：${this.skillCn(pick)}材料 x${mats}
-技能EXP +${xp}
-另外：通用材料 +1`);
-  },
-
-  skillCn(key) {
-    return (
-      {
-        watercolor: '水彩',
-        illustration: '插画/构成',
-        tarot: '塔罗',
-        bazi: '八字',
-      }[key] || key
-    );
-  },
-
-  upgradeSkill(skillKey) {
-    this.ensurePersonaSystem();
-    const p = this.data.persona;
-    const s = p.skills[skillKey];
-    if (!s) return;
-
-    if (s.lvl >= 10) {
-      alert('这个技能已满级（Lv.10）。');
-      return;
-    }
-
-    const needXp = this.getSkillXpNeed(s.lvl);
-    const needM = this.getSkillMatNeed(s.lvl);
-
-    // 材料允许用通用材料补齐
-    const haveM = (p.mats[skillKey] || 0);
-    const haveU = (p.mats.universal || 0);
-    const miss = Math.max(0, needM - haveM);
-
-    if (s.xp < needXp) {
-      alert(`EXP 不够：需要 ${needXp}，当前 ${s.xp}。
-去做点对应标签的任务/课程，或者开盲盒拿EXP。`);
-      return;
-    }
-
-    if (haveM + haveU < needM) {
-      alert(`材料不够：需要 ${needM}，你有 ${haveM}（专属）+ ${haveU}（通用）。
-去做任务/开盲盒就能慢慢攒。`);
-      return;
-    }
-
-    // 消耗材料
-    if (haveM >= needM) {
-      p.mats[skillKey] -= needM;
-    } else {
-      p.mats[skillKey] = 0;
-      p.mats.universal -= miss;
-    }
-
-    s.lvl += 1;
-    s.xp = 0;
-
-    this.personaAddDrop(null, 0, 0, `升级：${this.skillCn(skillKey)} -> Lv.${s.lvl}`);
-    this.save();
-    this.renderProfile('persona');
-
-    alert(`✅升级成功！
-${this.skillCn(skillKey)} -> Lv.${s.lvl}`);
-  },
-
-  renderPersona() {
-    this.ensurePersonaSystem();
-    const p = this.data.persona;
-
-    const body = document.getElementById('profile-tab-body');
-    if (!body) return;
-
-    const today = this._todayKey();
-    const freeUsed = p.lastFreeRoll === today;
-
-    const skillRow = (key, emoji) => {
-      const s = p.skills[key];
-      const needXp = this.getSkillXpNeed(s.lvl);
-      const needM = this.getSkillMatNeed(s.lvl);
-      const haveM = p.mats[key] || 0;
-      const haveU = p.mats.universal || 0;
-      const canUp = s.lvl < 10 && s.xp >= needXp && (haveM + haveU) >= needM;
-
-      return `
-        <div class="row" style="align-items:center;">
-          <div class="row-left">
-            <span class="row-title">${emoji} ${this.skillCn(key)} <span style="color:var(--gold-main)">Lv.${s.lvl}</span></span>
-            <span class="row-meta">EXP ${s.xp}/${needXp} ｜ 材料 ${haveM}/${needM}（通用 ${haveU} 可补）</span>
-          </div>
-          <button class="btn-act" ${canUp ? '' : 'disabled'} onclick="App.upgradeSkill('${key}')">
-            <span class="txt-cn">升级</span><span class="txt-en">UP</span>
-          </button>
-        </div>
-      `;
-    };
-
-    const historyHtml = (p.history && p.history.length)
-      ? `<div style="margin-top:12px; padding:12px; border:1px dashed #333; border-radius:12px;">
-           <div style="font-size:12px; color:#888; margin-bottom:8px;">最近掉落（静默记录）</div>
-           <div style="max-height:160px; overflow:auto; font-size:12px; color:#666; line-height:1.6;">
-             ${p.history.map(x => `<div>${x}</div>`).join('')}
-           </div>
-         </div>`
-      : `<div style="margin-top:12px; padding:12px; border:1px dashed #333; border-radius:12px; color:#666; font-size:12px;">还没有掉落记录：去完成一个日常/纪行任务试试。</div>`;
-
-    body.innerHTML = `
-      <div style="padding:10px;">
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:10px;">
-          <div>
-            <div style="font-family:'Cinzel'; color:var(--gold-main); font-size:18px;">人格 · 技能成长</div>
-            <div style="font-size:12px; color:#666; margin-top:4px;">徽记：<span style="color:#ddd">${p.tokens}</span> ｜ 通用材料：<span style="color:#ddd">${p.mats.universal || 0}</span></div>
-          </div>
-
-          <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
-            <button class="btn-act" ${freeUsed ? 'disabled' : ''} onclick="App.personaRoll(false)">
-              <span class="txt-cn">${freeUsed ? '今日已开' : '免费盲盒'}</span><span class="txt-en">FREE</span>
-            </button>
-            <button class="btn-act" ${(p.tokens < 10) ? 'disabled' : ''} onclick="App.personaRoll(true)">
-              <span class="txt-cn">徽记×10</span><span class="txt-en">ROLL</span>
-            </button>
-          </div>
-        </div>
-
-        <div style="padding:12px; border:1px solid #222; border-radius:14px; margin-top:10px;">
-          <div style="font-size:13px; color:#888; margin-bottom:8px;">画家人格（职业分支 = 技能）</div>
-          ${skillRow('watercolor', '🎨')}
-          ${skillRow('illustration', '🖋️')}
-        </div>
-
-        <div style="padding:12px; border:1px solid #222; border-radius:14px; margin-top:10px;">
-          <div style="font-size:13px; color:#888; margin-bottom:8px;">玄学家人格（东玄/西玄 = 技能）</div>
-          ${skillRow('tarot', '🃏')}
-          ${skillRow('bazi', '🧭')}
-        </div>
-
-        <div style="margin-top:10px; padding:12px; border:1px dashed #333; border-radius:12px; color:#666; font-size:12px; line-height:1.6;">
-          <div style="color:#888; margin-bottom:6px;">老师的话（很短但很关键）</div>
-          <div>1）你想要的是“现实画像”，所以我们让“努力 -> 掉落 -> 升级”成立。</div>
-          <div>2）断签不惩罚，只要你今天做了一点点，就会积累可见的成长。</div>
-          <div>3）标签体系以后再精炼：先用模糊匹配跑起来，等你更熟了再把任务打标签做精确掉落。</div>
-        </div>
-
-        ${historyHtml}
-      </div>
-    `;
-  },
-
-  renderProfile(tab) {
-    // tab: 'profile' | 'persona'
-    if (tab) this._profileTab = tab;
-    if (!this._profileTab) this._profileTab = 'profile';
-
-    const container = document.getElementById('profile-content');
-    container.innerHTML = `
-      <div style="display:flex; justify-content:center; gap:10px; margin-top:20px;">
-        <button class="btn-act" onclick="App.renderProfile('profile')"><span class="txt-cn">档案</span><span class="txt-en">PROFILE</span></button>
-        <button class="btn-act" onclick="App.renderProfile('persona')"><span class="txt-cn">人格</span><span class="txt-en">PERSONA</span></button>
-      </div>
-      <div id="profile-tab-body"></div>
-    `;
-
-    if (this._profileTab === 'persona') {
-      this.renderPersona();
-    } else {
-      this.renderProfileCard();
-    }
-  },
-
-  renderProfileCard() {
+  renderProfile() {
     const d = this.data.profile;
-    const body = document.getElementById('profile-tab-body');
-    body.innerHTML = `
-      <div class="profile-card">
+    const container = document.getElementById("profile-content");
+    container.innerHTML = `<div class="profile-card">
         <div class="avatar-box" onclick="document.getElementById('avatar-input').click()">
-          ${d.avatar ? `<img src="${d.avatar}" class="avatar-img">` : `<div class="avatar-placeholder">?</div>`}
+          ${
+            d.avatar
+              ? `<img src="${d.avatar}" class="avatar-img">`
+              : `<div class="avatar-placeholder">?</div>`
+          }
         </div>
         <div class="p-col">
-          <div class="p-row"><span class="p-label">昵称 / NAME</span><span class="p-val">${d.name}<span class="edit-icon" onclick="App.editName()">✎</span></span></div>
+          <div class="p-row">
+            <span class="p-label">昵称 / NAME</span>
+            <span class="p-val">${d.name}<span class="edit-icon" onclick="App.editName()">✎</span></span>
+          </div>
           <div class="p-row"><span class="p-label">称号 / TITLE</span><span class="p-val">${d.title}</span></div>
           <div class="p-row"><span class="p-label">等级 / LEVEL</span><span class="p-val">Lv.${this.data.level}</span></div>
         </div>
         <div class="p-col">
-          <div class="p-row"><span class="p-label">生日 / BIRTHDAY</span><span class="p-val">${d.birthday}<span class="edit-icon" onclick="App.editBirthday()">✎</span></span></div>
+          <div class="p-row">
+            <span class="p-label">生日 / BIRTHDAY</span>
+            <span class="p-val">${d.birthday}<span class="edit-icon" onclick="App.editBirthday()">✎</span></span>
+          </div>
           <div class="p-row"><span class="p-label">段位 / RANK</span><span class="p-val">${d.rank}</span></div>
           <div class="p-row"><span class="p-label">能力 / ABILITY</span><span class="p-val">${d.skill}</span></div>
         </div>
-      </div>
-    `;
+      </div>`;
   },
 
   editName() {
