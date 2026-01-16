@@ -40,7 +40,7 @@ const App = {
 
     // 这行会尝试自动播放，失败也没关系（手机常见）
     const bgm = document.getElementById("bgm");
-    if (bgm) bgm.play().catch(() => {});
+    if (bgm) bgm.play().catch(() => { });
   },
 
   // 修复：深度合并 load 数据，防止 profile 丢失
@@ -221,6 +221,13 @@ const App = {
       } else {
         console.error("MainlineModule not ready");
       }
+    } else if (viewId === "view-persona") {
+      if (typeof PersonaModule !== "undefined" && PersonaModule.open) {
+        PersonaModule.open();
+      } else {
+        console.error("PersonaModule 未加载，请检查 js/persona.js 是否引入");
+      }
+
     } else if (viewId === "view-museum") {
       this.renderMuseumTabs();
       this.renderMuseum("permanent");
@@ -316,10 +323,9 @@ const App = {
         <div class="ach-title">${ach.name}</div>
         <div class="ach-desc">${ach.desc} (${currentVal}/${ach.val})</div>
         <div class="ach-stamp">CLAIMED</div>
-        ${
-          !claimed && unlocked
-            ? `<button class="btn-act" onclick="App.claimAchievement('${ach.id}', '${cat}')"><span class="txt-cn">领取</span></button>`
-            : ""
+        ${!claimed && unlocked
+          ? `<button class="btn-act" onclick="App.claimAchievement('${ach.id}', '${cat}')"><span class="txt-cn">领取</span></button>`
+          : ""
         }`;
 
       grid.appendChild(div);
@@ -357,9 +363,8 @@ const App = {
           <span class="row-title">${item.name}</span>
           <span class="row-meta">原石: ${item.reward} | 经验: ${item.exp}</span>
         </div>
-        <button class="btn-act" ${done ? "disabled" : ""} onclick="App.doRoutineTask('${item.id}', ${
-        item.reward
-      }, ${item.exp}, ${idx}, '${item.link || ""}')">
+        <button class="btn-act" ${done ? "disabled" : ""} onclick="App.doRoutineTask('${item.id}', ${item.reward
+        }, ${item.exp}, ${idx}, '${item.link || ""}')">
           <span class="txt-cn">${done ? "已完成" : "执行"}</span>
           <span class="txt-en">${done ? "COMPLETED" : "EXECUTE"}</span>
         </button>`;
@@ -489,13 +494,12 @@ const App = {
         <button class="btn-act" onclick="App.renderWish(0)" style="margin-bottom:20px;">BACK</button>
         <div style="max-height:400px; overflow-y:auto;">
           ${(this.data.gachaHistory || [])
-            .map(
-              (h) =>
-                `<div style="border-bottom:1px dashed #333; padding:10px; color:${
-                  h.star >= 5 ? "var(--gold-main)" : h.star === 4 ? "#fff" : "#777"
-                }">[${h.star}★] ${h.name} <span style="float:right; font-size:10px; color:#555">${h.date}</span></div>`
-            )
-            .join("")}
+        .map(
+          (h) =>
+            `<div style="border-bottom:1px dashed #333; padding:10px; color:${h.star >= 5 ? "var(--gold-main)" : h.star === 4 ? "#fff" : "#777"
+            }">[${h.star}★] ${h.name} <span style="float:right; font-size:10px; color:#555">${h.date}</span></div>`
+        )
+        .join("")}
         </div>
       </div>`;
   },
@@ -812,11 +816,10 @@ const App = {
     const container = document.getElementById("profile-content");
     container.innerHTML = `<div class="profile-card">
         <div class="avatar-box" onclick="document.getElementById('avatar-input').click()">
-          ${
-            d.avatar
-              ? `<img src="${d.avatar}" class="avatar-img">`
-              : `<div class="avatar-placeholder">?</div>`
-          }
+          ${d.avatar
+        ? `<img src="${d.avatar}" class="avatar-img">`
+        : `<div class="avatar-placeholder">?</div>`
+      }
         </div>
         <div class="p-col">
           <div class="p-row">
